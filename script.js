@@ -33,12 +33,30 @@ const productData = {
 لو تحنّ لأيام FIFA 16 وتبيها بملابس 2025، فهذا المود خيار ذكي. قديم بالقلب، حديث بالشكل—توازن نادر هالأيام. مو رسمي؟ صحيح. بس المتعة؟ موجودة وبقوة.`,
     
     features: [
-        { title: "قيمبلاي سلس", description: "نفس تجربة FIFA 16 الكلاسيكية الناعمة والممتعة في التحكم واللعب" },
-        { title: "تحديثات الموسم", description: "جميع الفرق والانتقالات والصفقات محدثة لموسم 2024-2025" },
-        { title: "جرافيكس محسّن", description: "ملاعب وإضاءات محسنة مع الحفاظ على أداء مرتفع على الأجهزة المتوسطة" },
-        { title: "خفيفة على النظام", description: "مصممة للعمل بسلاسة حتى على الأجهزة ذات المواصفات المتوسطة" },
-        { title: "دعم أندرويد", description: "متوافقة مع أندرويد 13 والأحدث، سهلة التثبيت على الموبايل" },
-        { title: "تحديثات دورية", description: "تحديثات مستمرة للفرق والشعارات والأطقم طوال الموسم" }
+        { 
+            title: "قيمبلاي سلس", 
+            description: "نفس تجربة FIFA 16 الكلاسيكية الناعمة والممتعة في التحكم واللعب" 
+        },
+        { 
+            title: "تحديثات الموسم", 
+            description: "جميع الفرق والانتقالات والصفقات محدثة لموسم 2024-2025" 
+        },
+        { 
+            title: "جرافيكس محسّن", 
+            description: "ملاعب وإضاءات محسنة مع الحفاظ على أداء مرتفع على الأجهزة المتوسطة" 
+        },
+        { 
+            title: "خفيفة على النظام", 
+            description: "مصممة للعمل بسلاسة حتى على الأجهزة ذات المواصفات المتوسطة" 
+        },
+        { 
+            title: "دعم أندرويد", 
+            description: "متوافقة مع أندرويد 13 والأحدث، سهلة التثبيت على الموبايل" 
+        },
+        { 
+            title: "تحديثات دورية", 
+            description: "تحديثات مستمرة للفرق والشعارات والأطقم طوال الموسم" 
+        }
     ],
     
     screenshots: [
@@ -84,26 +102,41 @@ const productData = {
 // حالة التطبيق
 let downloadCount = 15327;
 let detailsOpen = false;
+let header = null;
 
-// تهيئة التطبيق
-function init() {
-    loadData();
-    setupEventListeners();
-    renderDetailsContent();
-    setupAnimations();
+// تهيئة الموقع
+function initSite() {
+    console.log("🚀 NARUTO_CODEX موقع يعمل!");
+    
+    // تحميل البيانات
+    loadSavedData();
+    
+    // عرض المحتوى
+    renderDetails();
+    
+    // إعداد التفاعلات
+    setupInteractions();
+    
+    // إعداد التمرير
+    setupScrollEffects();
+    
+    // تحديث العداد
+    updateCounter();
+    
+    // إضافة جسيمات إضافية
+    createParticles();
 }
 
 // تحميل البيانات المحفوظة
-function loadData() {
+function loadSavedData() {
     try {
         const saved = localStorage.getItem('narutoCodexData');
         if (saved) {
             const data = JSON.parse(saved);
             downloadCount = data.downloadCount || downloadCount;
-            updateDownloadCounter();
         }
     } catch (e) {
-        console.log('لا يمكن تحميل البيانات المحفوظة');
+        console.log("📁 لا يمكن تحميل البيانات المحفوظة");
     }
 }
 
@@ -116,33 +149,12 @@ function saveData() {
     localStorage.setItem('narutoCodexData', JSON.stringify(data));
 }
 
-// إعداد مستمعي الأحداث
-function setupEventListeners() {
-    // زر عرض/إخفاء التفاصيل
-    const viewMoreBtn = document.getElementById('view-more-btn');
-    if (viewMoreBtn) {
-        viewMoreBtn.addEventListener('click', toggleDetails);
-    }
-    
-    // منع النقر المزدوج على الهواتف
-    let lastClick = 0;
-    if (viewMoreBtn) {
-        viewMoreBtn.addEventListener('touchstart', function(e) {
-            const now = Date.now();
-            if (now - lastClick < 500) {
-                e.preventDefault();
-            }
-            lastClick = now;
-        });
-    }
-}
-
 // عرض محتوى التفاصيل
-function renderDetailsContent() {
+function renderDetails() {
     const detailsContent = document.querySelector('.details-content');
     if (!detailsContent) return;
     
-    const content = `
+    detailsContent.innerHTML = `
         <div class="full-description">
             ${productData.fullDesc.split('\n').map(line => 
                 line.trim() === '' ? '<br>' : `<p>${line}</p>`
@@ -162,7 +174,7 @@ function renderDetailsContent() {
             <h3>لقطات من اللعبة</h3>
             <div class="screenshots-grid">
                 ${productData.screenshots.map((screenshot, index) => `
-                    <div class="screenshot" data-index="${index}">
+                    <div class="screenshot" onclick="openScreenshot(${index})">
                         <img src="${screenshot}" alt="لقطة ${index + 1}" loading="lazy">
                     </div>
                 `).join('')}
@@ -175,7 +187,7 @@ function renderDetailsContent() {
             
             <div class="download-options">
                 ${productData.downloads.map(item => `
-                    <div class="download-option" data-id="${item.id}">
+                    <div class="download-option">
                         <div class="download-icon" style="background-color: ${item.color}">
                             <i class="${item.icon}"></i>
                         </div>
@@ -187,7 +199,7 @@ function renderDetailsContent() {
                                 <span class="file-type"><i class="fas fa-file"></i> ملف ZIP</span>
                             </div>
                         </div>
-                        <button class="download-option-btn" style="background-color: ${item.color}">
+                        <button class="download-option-btn" onclick="downloadSingleFile('${item.id}')" style="background-color: ${item.color}">
                             <i class="fas fa-download"></i>
                             تحميل
                         </button>
@@ -195,7 +207,7 @@ function renderDetailsContent() {
                 `).join('')}
             </div>
             
-            <button class="download-all-btn" id="download-all-btn">
+            <button class="download-all-btn" onclick="downloadAllFiles()">
                 <i class="fas fa-download"></i>
                 تحميل جميع الملفات مرة واحدة
             </button>
@@ -206,57 +218,96 @@ function renderDetailsContent() {
             </div>
         </div>
     `;
-    
-    detailsContent.innerHTML = content;
-    
-    // إضافة مستمعي الأحداث للمحتوى الديناميكي
-    setTimeout(() => {
-        setupDynamicEventListeners();
-    }, 100);
 }
 
-// إعداد مستمعي الأحداث للمحتوى الديناميكي
-function setupDynamicEventListeners() {
-    // أزرار التحميل الفردية
-    document.querySelectorAll('.download-option-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const fileId = this.closest('.download-option').dataset.id;
-            downloadFile(fileId);
-        });
-    });
-    
-    // زر تحميل الكل
-    const downloadAllBtn = document.getElementById('download-all-btn');
-    if (downloadAllBtn) {
-        downloadAllBtn.addEventListener('click', downloadAllFiles);
+// إعداد التفاعلات
+function setupInteractions() {
+    // زر عرض/إخفاء التفاصيل
+    const viewMoreBtn = document.getElementById('view-more-btn');
+    if (viewMoreBtn) {
+        viewMoreBtn.addEventListener('click', toggleDetails);
     }
     
-    // لقطات الشاشة
-    document.querySelectorAll('.screenshot').forEach(screenshot => {
-        screenshot.addEventListener('click', function() {
-            const index = parseInt(this.dataset.index);
-            openScreenshot(index);
+    // منع سلوك اللمس غير المرغوب
+    document.addEventListener('touchstart', function(e) {
+        if (e.target.tagName === 'BUTTON') {
+            e.preventDefault();
+        }
+    }, { passive: false });
+    
+    // تأثير الضغط على الأزرار
+    document.querySelectorAll('button').forEach(button => {
+        button.addEventListener('mousedown', () => {
+            button.style.transform = 'scale(0.95)';
+        });
+        
+        button.addEventListener('mouseup', () => {
+            button.style.transform = '';
+        });
+        
+        button.addEventListener('mouseleave', () => {
+            button.style.transform = '';
         });
     });
 }
 
-// إعداد الأنيميشن
-function setupAnimations() {
-    const productCard = document.getElementById('product-card');
-    if (!productCard) return;
+// إعداد تأثيرات التمرير
+function setupScrollEffects() {
+    header = document.getElementById('main-header');
     
-    // إظهار البطاقة عند التحميل
-    productCard.style.opacity = '0';
-    productCard.style.transform = 'translateY(30px)';
-    
-    setTimeout(() => {
-        productCard.style.transition = 'opacity 0.8s ease, transform 0.8s ease';
-        productCard.style.opacity = '1';
-        productCard.style.transform = 'translateY(0)';
-    }, 300);
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 50) {
+            header.classList.add('scrolled');
+        } else {
+            header.classList.remove('scrolled');
+        }
+        
+        // تأثير التمرير على البطاقة
+        const productCard = document.querySelector('.product-card');
+        if (productCard) {
+            const cardPosition = productCard.getBoundingClientRect().top;
+            const screenPosition = window.innerHeight / 1.3;
+            
+            if (cardPosition < screenPosition) {
+                productCard.style.opacity = '1';
+                productCard.style.transform = 'translateY(0)';
+            }
+        }
+    });
 }
 
-// تبديل عرض التفاصيل (إصلاح المشكلة الرئيسية)
+// إنشاء جسيمات إضافية
+function createParticles() {
+    const particlesContainer = document.querySelector('.particles');
+    if (!particlesContainer) return;
+    
+    for (let i = 0; i < 20; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        
+        // إعداد عشوائي
+        const size = Math.random() * 3 + 1;
+        const left = Math.random() * 100;
+        const top = Math.random() * 100;
+        const animationDuration = Math.random() * 30 + 20;
+        const animationDelay = Math.random() * 10;
+        const color = Math.random() > 0.5 ? 'var(--accent-gold)' : 'var(--accent-silver)';
+        
+        particle.style.cssText = `
+            width: ${size}px;
+            height: ${size}px;
+            left: ${left}%;
+            top: ${top}%;
+            background: ${color};
+            animation-duration: ${animationDuration}s;
+            animation-delay: ${animationDelay}s;
+        `;
+        
+        particlesContainer.appendChild(particle);
+    }
+}
+
+// تبديل عرض التفاصيل
 function toggleDetails() {
     const detailsElement = document.getElementById('product-details');
     const button = document.getElementById('view-more-btn');
@@ -271,87 +322,169 @@ function toggleDetails() {
         icon.className = 'fas fa-chevron-up';
         btnText.textContent = 'إخفاء التفاصيل';
         
-        // تمرير سلس للتفاصيل (على الكمبيوتر فقط)
+        // تأثير سلس للتمرير
         if (window.innerWidth > 768) {
             setTimeout(() => {
                 detailsElement.scrollIntoView({ 
                     behavior: 'smooth', 
                     block: 'start' 
                 });
-            }, 300);
+            }, 100);
         }
+        
+        // تأثير صوتي (اختياري)
+        playSoundEffect('open');
     } else {
         // إغلاق التفاصيل
         detailsElement.classList.remove('active');
         icon.className = 'fas fa-chevron-down';
         btnText.textContent = 'عرض التفاصيل الكاملة';
+        
+        // تأثير صوتي (اختياري)
+        playSoundEffect('close');
     }
 }
 
-// تحميل ملف معين
-function downloadFile(fileId) {
+// تأثيرات صوتية (اختيارية)
+function playSoundEffect(type) {
+    // يمكن إضافة أصوات إذا أردت
+    console.log(`🔊 صوت تأثير: ${type}`);
+}
+
+// تحميل ملف واحد
+function downloadSingleFile(fileId) {
     const file = productData.downloads.find(d => d.id === fileId);
     if (!file) return;
     
-    const btn = document.querySelector(`.download-option[data-id="${fileId}"] .download-option-btn`);
-    if (!btn) return;
+    const buttons = document.querySelectorAll('.download-option-btn');
+    let clickedButton = null;
     
-    const originalHTML = btn.innerHTML;
+    // العثور على الزر المناسب
+    buttons.forEach(btn => {
+        if (btn.onclick && btn.onclick.toString().includes(fileId)) {
+            clickedButton = btn;
+        }
+    });
     
-    // تغيير حالة الزر
-    btn.innerHTML = '<i class="fas fa-spinner loading"></i> جاري التحميل...';
-    btn.disabled = true;
-    btn.style.opacity = '0.7';
-    
-    // محاكاة التحميل
-    setTimeout(() => {
+    if (clickedButton) {
+        const originalHTML = clickedButton.innerHTML;
+        
+        // تأثير الضغط
+        clickedButton.style.transform = 'scale(0.95)';
+        clickedButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحميل...';
+        clickedButton.disabled = true;
+        
+        // محاكاة التحميل
+        setTimeout(() => {
+            // فتح الرابط
+            window.open(file.url, '_blank');
+            
+            // تتبع التنزيل
+            trackDownload(file.title);
+            
+            // استعادة الزر مع تأثير
+            setTimeout(() => {
+                clickedButton.innerHTML = '<i class="fas fa-check"></i> تم التحميل!';
+                clickedButton.style.backgroundColor = '#00a859';
+                
+                // العودة للوضع الطبيعي
+                setTimeout(() => {
+                    clickedButton.innerHTML = originalHTML;
+                    clickedButton.disabled = false;
+                    clickedButton.style.transform = '';
+                    clickedButton.style.backgroundColor = '';
+                    
+                    // إظهار رسالة النجاح
+                    showSuccess(`بدأ تحميل ${file.title}`);
+                }, 1500);
+            }, 1000);
+        }, 500);
+    } else {
+        // الخيار الاحتياطي
         window.open(file.url, '_blank');
         trackDownload(file.title);
-        
-        // استعادة الزر بعد ثانيتين
-        setTimeout(() => {
-            btn.innerHTML = originalHTML;
-            btn.disabled = false;
-            btn.style.opacity = '1';
-            showSuccessMessage(`تم بدء تحميل "${file.title}"`);
-        }, 2000);
-    }, 1000);
+        showSuccess(`بدأ تحميل ${file.title}`);
+    }
 }
 
 // تحميل جميع الملفات
 function downloadAllFiles() {
     if (!confirm('هل تريد تحميل جميع الملفات؟ قد يستغرق هذا بعض الوقت.')) return;
     
-    let delay = 0;
-    productData.downloads.forEach(file => {
+    // تأثير على زر تحميل الكل
+    const allBtn = document.querySelector('.download-all-btn');
+    const originalAllHTML = allBtn.innerHTML;
+    allBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري التحميل...';
+    allBtn.disabled = true;
+    
+    // تحميل كل ملف بتأخير
+    let completed = 0;
+    productData.downloads.forEach((file, index) => {
         setTimeout(() => {
             window.open(file.url, '_blank');
             trackDownload(file.title);
-        }, delay);
-        delay += 1000; // ثانية بين كل ملف
+            completed++;
+            
+            // عند اكتمال جميع الملفات
+            if (completed === productData.downloads.length) {
+                setTimeout(() => {
+                    allBtn.innerHTML = '<i class="fas fa-check"></i> تم تحميل الكل!';
+                    allBtn.style.backgroundColor = '#00a859';
+                    
+                    setTimeout(() => {
+                        allBtn.innerHTML = originalAllHTML;
+                        allBtn.disabled = false;
+                        allBtn.style.backgroundColor = '';
+                        showSuccess('تم بدء تحميل جميع الملفات');
+                    }, 2000);
+                }, 500);
+            }
+        }, index * 800);
     });
-    
-    trackDownload('جميع الملفات');
-    showSuccessMessage('بدأ تحميل جميع الملفات');
 }
 
 // فتح لقطة شاشة
 function openScreenshot(index) {
     if (index >= 0 && index < productData.screenshots.length) {
-        window.open(productData.screenshots[index], '_blank');
+        // تأثير قبل الفتح
+        const screenshots = document.querySelectorAll('.screenshot');
+        if (screenshots[index]) {
+            screenshots[index].style.transform = 'scale(0.95)';
+            
+            setTimeout(() => {
+                window.open(productData.screenshots[index], '_blank');
+                
+                setTimeout(() => {
+                    screenshots[index].style.transform = '';
+                }, 300);
+            }, 200);
+        } else {
+            window.open(productData.screenshots[index], '_blank');
+        }
     }
 }
 
 // تتبع التنزيلات
 function trackDownload(fileName) {
     downloadCount++;
-    updateDownloadCounter();
+    updateCounter();
     saveData();
-    console.log(`تحميل: ${fileName} - الإجمالي: ${downloadCount}`);
+    
+    // تأثير على العداد
+    const counter = document.getElementById('download-count');
+    if (counter) {
+        counter.style.transform = 'scale(1.2)';
+        counter.style.color = 'var(--accent-gold)';
+        
+        setTimeout(() => {
+            counter.style.transform = '';
+            counter.style.color = '';
+        }, 500);
+    }
 }
 
-// تحديث عداد التنزيلات
-function updateDownloadCounter() {
+// تحديث العداد
+function updateCounter() {
     const counter = document.getElementById('download-count');
     if (counter) {
         counter.textContent = downloadCount.toLocaleString('ar-SA');
@@ -359,85 +492,77 @@ function updateDownloadCounter() {
 }
 
 // عرض رسالة نجاح
-function showSuccessMessage(text) {
-    // إزالة أي رسالة سابقة
-    const oldMessage = document.querySelector('.success-message');
-    if (oldMessage) {
-        oldMessage.remove();
-    }
+function showSuccess(message) {
+    // إزالة الرسائل السابقة
+    const oldMsg = document.querySelector('.success-message');
+    if (oldMsg) oldMsg.remove();
     
-    // إنشاء الرسالة الجديدة
-    const message = document.createElement('div');
-    message.className = 'success-message';
-    message.innerHTML = `
+    // إنشاء رسالة جديدة
+    const msg = document.createElement('div');
+    msg.className = 'success-message';
+    msg.innerHTML = `
         <i class="fas fa-check-circle"></i>
-        <span>${text}</span>
-        <button class="close-btn"><i class="fas fa-times"></i></button>
+        <span>${message}</span>
     `;
     
-    // زر الإغلاق
-    const closeBtn = message.querySelector('.close-btn');
-    closeBtn.addEventListener('click', () => {
-        message.style.opacity = '0';
-        message.style.transform = 'translateX(-50%) translateY(-100%)';
-        setTimeout(() => message.remove(), 300);
+    document.body.appendChild(msg);
+    
+    // إزالة الرسالة بعد 4 ثوان
+    setTimeout(() => {
+        if (msg.parentElement) {
+            msg.style.opacity = '0';
+            msg.style.transform = 'translateX(-50%) translateY(-100%)';
+            
+            setTimeout(() => {
+                if (msg.parentElement) {
+                    msg.remove();
+                }
+            }, 300);
+        }
+    }, 4000);
+}
+
+// تأثيرات إضافية عند التحميل
+window.addEventListener('load', () => {
+    // تأثير تدريجي للمحتوى
+    const elements = document.querySelectorAll('.hero-content, .product-card, .section-title');
+    elements.forEach((el, index) => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        
+        setTimeout(() => {
+            el.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+            el.style.opacity = '1';
+            el.style.transform = 'translateY(0)';
+        }, index * 200);
     });
     
-    document.body.appendChild(message);
+    // تأثير تدريجي للشعار
+    const logoIcon = document.querySelector('.logo-icon');
+    const logoText = document.querySelector('.logo-text h1');
     
-    // إزالة تلقائية بعد 5 ثوان
-    setTimeout(() => {
-        if (message.parentElement) {
-            message.style.opacity = '0';
-            message.style.transform = 'translateX(-50%) translateY(-100%)';
-            setTimeout(() => message.remove(), 300);
-        }
-    }, 5000);
-}
-
-// منع المشاكل على الهواتف
-function preventMobileIssues() {
-    // منع التكبير عند النقر المزدوج
-    let lastTouchEnd = 0;
-    document.addEventListener('touchend', function(event) {
-        const now = (new Date()).getTime();
-        if (now - lastTouchEnd <= 300) {
-            event.preventDefault();
-        }
-        lastTouchEnd = now;
-    }, false);
+    if (logoIcon) {
+        setTimeout(() => {
+            logoIcon.style.transform = 'rotateY(360deg)';
+            
+            setTimeout(() => {
+                logoIcon.style.transform = '';
+            }, 1000);
+        }, 500);
+    }
     
-    // منع سلوك السحب على الهواتف
-    document.addEventListener('touchmove', function(e) {
-        if (e.target.tagName === 'BUTTON') {
-            e.preventDefault();
-        }
-    }, { passive: false });
-}
-
-// تشغيل التطبيق عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', function() {
-    init();
-    preventMobileIssues();
-});
-
-// إضافة دعم لواجهة المستخدم
-window.addEventListener('resize', function() {
-    // إعادة حساب الأشياء عند تغيير حجم الشاشة
-    if (window.innerWidth <= 768 && detailsOpen) {
-        // على الهواتف، لا نستخدم scrollIntoView عند الفتح
-        const viewMoreBtn = document.getElementById('view-more-btn');
-        if (viewMoreBtn) {
-            viewMoreBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
+    if (logoText) {
+        setTimeout(() => {
+            logoText.style.backgroundSize = '200% auto';
+        }, 300);
     }
 });
 
-// جعل الدوال متاحة عالمياً للتصحيح
-window.narutoCodex = {
-    toggleDetails,
-    downloadFile,
-    downloadAllFiles,
-    trackDownload,
-    showSuccessMessage
-};
+// تشغيل الموقع
+document.addEventListener('DOMContentLoaded', initSite);
+
+// جعل الدوال متاحة عالمياً
+window.downloadSingleFile = downloadSingleFile;
+window.downloadAllFiles = downloadAllFiles;
+window.openScreenshot = openScreenshot;
+window.toggleDetails = toggleDetails;
